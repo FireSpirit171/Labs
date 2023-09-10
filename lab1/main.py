@@ -14,8 +14,15 @@ def get_koef(ind, prompt):
         coef = int(sys.argv[ind])
     except:
         print(f"Введите коэффициент {prompt.upper()}: ", end="")
-        coef = float(input())
+        coef = ""
+        while type(coef)!=int:
+            coef = input()
+            try:
+                coef = int(coef)
+            except:
+                print("Неверный ввод! Повторите попытку: ", end="")
     return coef
+
 
 #Получаем корни биквадратного уравнения
 def get_roots(a,b,c):
@@ -49,6 +56,7 @@ def main():
         return
 
     #Обработка результата
+    print(f"Введенное уравнение: {a}x^2+{b}x+{c}=0")
     if len(roots)!=0:
         if len(roots) == 2:
             print("Два действительных корня")
