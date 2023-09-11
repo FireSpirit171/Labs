@@ -12,3 +12,4 @@
 *.vsix
 
 *config.py
+**/__pycache__
