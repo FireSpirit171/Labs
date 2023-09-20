@@ -1,9 +1,27 @@
 from tkinter import *
 from tkinter import ttk
-from config import ICON_PATH, STAT_PATH
+from config import ICON_PATH, BACK_BUTTON_PATH, STAT_PATH
+
+class Window(Toplevel):
+    def __init__(self):
+        super().__init__()
+
+        #конфигурация окна
+        self.title("Game")
+        self.geometry("900x600+300+100")
+
+        #кнопка закрытия
+        photo = PhotoImage(file=BACK_BUTTON_PATH)
+        self.button = ttk.Button(self, image=photo)
+        self.button["command"] = self.go_back
+        self.button.pack(expand=True)
+    
+    def go_back(self):
+        self.destroy()
 
 def finish():
-    pass
+    global widget
+    widget.destroy()
 
 def show_stat():    
     #Читаем 3 строки файла и присваиваем значения в переменные
@@ -28,25 +46,30 @@ def show_stat():
     else:
         print("Ошибка!")
 
+def game():
+    game_widget = Window()
+
 def main():
-    widget = Tk()
-    widget.title("BlackJack")
-    icon = PhotoImage(file=ICON_PATH)
-    widget.iconphoto(False, icon)
-    widget.geometry("900x600+300+100")
 
+    #Управление на главном окне
     frame_main = ttk.Frame(borderwidth=1, relief=SOLID)
-    button_start = ttk.Button(frame_main, text="Новая игра")
-    button_continue = ttk.Button(frame_main, text="Продолжить игру")
-    button_stat = ttk.Button(frame_main, text="Статистика", command = show_stat)
-    button_start.pack()
-    button_continue.pack()
-    button_stat.pack()
+    button_start = ttk.Button(frame_main, text="Новая игра", command = game, width=50)
+    button_continue = ttk.Button(frame_main, text="Продолжить игру", width=50)
+    button_stat = ttk.Button(frame_main, text="Статистика", command = show_stat, width=50)
+    button_start.pack(fill=X, ipadx=10, ipady=10)
+    button_continue.pack(fill=X, ipadx=10, ipady=10)
+    button_stat.pack(fill=X, ipadx=10, ipady=10)
 
-    frame_main.pack(anchor=CENTER, fill=NONE)
+    #frame_main.place(x=300, y=232, height=136, width=300)
+    frame_main.pack(expand=True)
 
     widget.mainloop()
     widget.protocol("WM_DELETE__WINDOW", finish)
 
 if __name__ == "__main__":
+    widget = Tk()
+    widget.title("BlackJack")
+    icon = PhotoImage(file=ICON_PATH)
+    widget.iconphoto(False, icon)
+    widget.geometry("300x200")
     main()
