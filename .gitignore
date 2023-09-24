@@ -11,6 +11,5 @@
 # Built Visual Studio Code Extensions
 *.vsix
 
-*stat.txt
 *config.py
 **/__pycache__
