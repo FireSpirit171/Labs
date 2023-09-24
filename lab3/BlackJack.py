@@ -4,7 +4,7 @@ import random
 from copy import deepcopy
 from PIL import Image, ImageTk
 from logic import total, show_cards, get_winner, player_turn, croupier_turn
-from config_path import ICON_PATH, BACK_BUTTON_PATH, STAT_PATH, CARD_PATH
+from config_path import ICON_PATH, STAT_PATH, CARD_PATH, CROUPIER_PATH, RULE
 
 ACES = {"A_s", "A_h", "A_c", "A_d"}
 
@@ -91,6 +91,23 @@ def finish():
     global widget
     widget.destroy()
 
+def rules():
+    global widget
+    for w in widget.winfo_children():
+        w.destroy()
+
+    rule = Text(background="green", foreground="white", font=("Arial", 14), wrap="word")
+    ys = ttk.Scrollbar(orient="vertical", command=rule.yview)
+    
+    rule.place(height=400, width=700, x=100, y=100)
+    rule.insert("1.0", RULE)
+    
+    ys.pack(side=RIGHT, fill=Y)
+    rule["yscrollcommand"] = ys.set
+
+    back_button = ttk.Button(widget, text="Назад", command=exit_game)
+    back_button.place(x=0, y=0)
+
 def get_stat():    
     #Читаем 3 строки файла и присваиваем значения в переменные
     with open(STAT_PATH, 'r') as stat_file:
@@ -147,6 +164,7 @@ def show_stat():
     for w in widget.winfo_children():
         w.destroy()
 
+    #Фрейм статистики и лэйблы
     stat_frame = ttk.Frame(borderwidth=1, relief=SOLID)
     games_label = ttk.Label(stat_frame, text=f"Количество игр: {games}", background="green", foreground="white", font=("Arial", 16))
     wons_label = ttk.Label(stat_frame, text=f"Победы: {wons}", background="green", foreground="white", font=("Arial", 16))
@@ -163,7 +181,7 @@ def show_stat():
     stat_frame.pack(expand=True)
 
     back_button = ttk.Button(widget, text="Назад", command=exit_game)
-    back_button.pack(anchor='nw')
+    back_button.place(x=0, y=0)
 
 def start_game():
     global widget
@@ -244,7 +262,7 @@ def take_card(player, cards):
 
 def croupier_take(croupie, cards, player):
     global widget
-    show_card(CARD_PATH.format(croupie[1]), 400, 10)
+    show_card(CARD_PATH.format(croupie[1]), 400, 150)
     player_tot = sum_player(player)
     for w in widget.winfo_children():
         if type(w)==ttk.Button:
@@ -258,7 +276,7 @@ def croupier_take(croupie, cards, player):
 
     while croupie_tot<17:
         croupie.append(cards[0])
-        show_card(CARD_PATH.format(cards.pop(0)), 240+len(croupie)*80, 10)
+        show_card(CARD_PATH.format(cards.pop(0)), 240+len(croupie)*80, 150)
         croupie_tot = total(croupie)
         if croupie_tot>21:
             counter = 0
@@ -293,6 +311,7 @@ def game():
     global widget
     for w in widget.winfo_children():
         w.destroy()
+    
     global all_images
     global num_cards_on_screen
     all_images.clear()      #Очистка буфера после предыдущей игры
@@ -300,6 +319,15 @@ def game():
     X = 320
     Y = 480
 
+    #Фото крупье
+    croupier_file = Image.open(CROUPIER_PATH)
+    vp_croupier = ImageTk.PhotoImage(croupier_file)
+    all_images.append(vp_croupier)
+    croupier_label = Label(background="green", image=all_images[num_cards_on_screen])
+    num_cards_on_screen += 1
+    croupier_label.place(height=120, width=140, x=350, y=10)
+
+    #Выход из игры
     back_button = ttk.Button(widget, text="Выйти из игры", command=exit_game)
     back_button.pack(anchor='nw')
     
@@ -322,8 +350,8 @@ def game():
     show_card(CARD_PATH.format(player[0]), X, Y)
     show_card(CARD_PATH.format(player[1]), X+80, Y)
     
-    show_card(CARD_PATH.format(croupier[0]), X, Y-470)
-    show_card(CARD_PATH.format("back"), X+80, Y-470)
+    show_card(CARD_PATH.format(croupier[0]), X, 150)
+    show_card(CARD_PATH.format("back"), X+80, 150)
 
     #Счет
     score = ttk.Label(widget, text=f"Сумма: {player_tot}", background="green", foreground="white", font=("Arial", 14))
@@ -341,10 +369,11 @@ def game():
 def main():
     for w in widget.winfo_children():
         w.destroy()
+
     #Управление на главном окне
     frame_main = ttk.Frame(borderwidth=1, relief=SOLID)
     button_start = ttk.Button(frame_main, text="Новая игра", command = start_game, width=50)
-    button_continue = ttk.Button(frame_main, text="Продолжить игру", width=50)
+    button_continue = ttk.Button(frame_main, text="Правила", command=rules, width=50)
     button_stat = ttk.Button(frame_main, text="Статистика", command = show_stat, width=50)
     button_start.pack(fill=X, ipadx=10, ipady=10)
     button_continue.pack(fill=X, ipadx=10, ipady=10)
@@ -360,6 +389,7 @@ def main():
 if __name__ == "__main__":
     widget = Tk()
     widget["bg"] = "green"
+    widget.resizable(False, False)
     widget.title("BlackJack")
     icon = PhotoImage(file=ICON_PATH)
     widget.iconphoto(False, icon)
