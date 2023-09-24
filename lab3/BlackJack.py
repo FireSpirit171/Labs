@@ -2,8 +2,11 @@ from tkinter import *
 from tkinter import ttk
 import random
 from copy import deepcopy
+from PIL import Image, ImageTk
 from logic import total, show_cards, get_winner, player_turn, croupier_turn
-from config import ICON_PATH, BACK_BUTTON_PATH, STAT_PATH
+from config import ICON_PATH, BACK_BUTTON_PATH, STAT_PATH, CARD_PATH
+
+ACES = {"A_s", "A_h", "A_c", "A_d"}
 
 #/////////////////////////////ВЗЯТО ИЗ LOGIC.PY//////////////////////////
 hearts = {
@@ -84,24 +87,6 @@ for m in [hearts, diamonds, spades, clubs]:
 #///////////////////////////////////////////////////////////////////////////////
 
 
-
-class Window(Tk):
-    def __init__(self):
-        super().__init__()
-
-        #конфигурация окна
-        self.title("Game")
-        self.geometry("900x600+300+100")
-
-        #кнопка закрытия
-        photo = PhotoImage(file=BACK_BUTTON_PATH)
-        self.button = ttk.Button(self, text="Выйти из игры!")
-        self.button["command"] = self.go_back
-        self.button.pack(anchor="sw")
-    
-    def go_back(self):
-        self.destroy()
-
 def finish():
     global widget
     widget.destroy()
@@ -130,19 +115,135 @@ def show_stat():
         print("Ошибка!")
 
 def start_game():
-    ans = 'y'
-    while ans != 'n':
-        game()
-        print("Начать новую игру? [y/n]")
-        ans = input()
-        while (ans!='y' and ans!='n'):
-            print("Повторите ввод")
-            ans = input()
+    global widget
+    hide_widgets()
+    game()
+
+def hide_widgets():
+    global widget
+    for child_widget in widget.winfo_children():
+        child_widget.destroy()
+
+def show_widgets():
+    global widget
+    for child_widget in widget.winfo_children():
+        child_widget.pack()
+
+def exit_game():
+    global widget
+    for w in widget.winfo_children():
+        w.destroy()
+    main()
+
+all_images = []
+num_cards_on_screen = 0
+def show_card(path, X, Y = 480):
+    global widget
+    global all_images
+    global num_cards_on_screen
+    image_file = Image.open(path)
+    vp_image = ImageTk.PhotoImage(image_file)
+    all_images.append(vp_image)
+
+    label = Label(image=all_images[num_cards_on_screen])
+    num_cards_on_screen += 1
+    label.place(x=X, y=Y)
+    #widget.update()
+    #widget.update_idletasks()
+
+def sum_player(player):
+    player_tot = total(player)
+    correct = 0
+    if player_tot>21:
+        counter = 0
+        for card in player:
+            if card in ACES:
+                counter+=1
+        correct = 10*counter 
+    return player_tot - correct
+
+def take_card(player, cards):
+    global widget
+    player.append(cards[0])
+
+    counter = 0
+    for card in player:
+        if card in ACES:
+            counter+=1
+    correct = 10*counter #Необходима для корректировки значения туза - 1 или 11
+
+    show_card(CARD_PATH.format(cards.pop(0)), 240+len(player)*80)
+
+    player_tot = total(player) - correct
+    score = ttk.Label(widget, text=f"Сумма: {player_tot}", background="green", foreground="white", font=("Arial", 14))
+    score.place(height=40, width=100, x=10, y=520)
+
+    if player_tot>21:
+        for w in widget.winfo_children():
+            if type(w)==ttk.Button:
+                w.destroy()
+        end = ttk.Label(widget, text="Вы проиграли!", background="green", foreground="white", font=("Arial", 24))
+        end.place(height=90, width=240, x=350, y=250)
+        menu_button = ttk.Button(text="Меню", command=main)
+        new_game_button = ttk.Button(text="Новая игра", command=game)
+        
+        menu_button.place(height=50, width=120, x=340, y=330)
+        new_game_button.place(height=50, width=120, x=470, y=330)
+
+def croupier_take(croupie, cards, player):
+    global widget
+    show_card(CARD_PATH.format(croupie[1]), 400, 10)
+    player_tot = sum_player(player)
+    for w in widget.winfo_children():
+        if type(w)==ttk.Button:
+            w.destroy()
+
+    if len(set(croupie).intersection(ACES))==2:
+        croupie_tot = 2
+    else:
+        croupie_tot = total(croupie)
+    correct = 0
+
+    while croupie_tot<17:
+        croupie.append(cards[0])
+        show_card(CARD_PATH.format(cards.pop(0)), 240+len(croupie)*80, 10)
+        croupie_tot = total(croupie)
+        if croupie_tot>21:
+            counter = 0
+            for card in croupie:
+                if card in ACES:
+                    counter+=1
+            correct = 10*counter
+        croupie_tot = total(croupie) - correct
+
+    #После добора крупье считаем победителя
+    if croupie_tot>21 or croupie_tot<player_tot:
+        end = ttk.Label(widget, text="Вы выиграли!", background="green", foreground="white", font=("Arial", 24))
+        end.place(height=90, width=240, x=350, y=250)
+    elif croupie_tot==player_tot:
+        end = ttk.Label(widget, text="Ничья!", background="green", foreground="white", font=("Arial", 24))
+        end.place(height=90, width=240, x=350, y=250)
+    else:
+        end = ttk.Label(widget, text="Вы проиграли!", background="green", foreground="white", font=("Arial", 24))
+        end.place(height=90, width=240, x=350, y=250)
+    
+    #Кнопки возврата в меню или начала новой игры
+    menu_button = ttk.Button(text="Меню", command=main)
+    new_game_button = ttk.Button(text="Новая игра", command=game)
+    menu_button.place(height=50, width=120, x=340, y=330)
+    new_game_button.place(height=50, width=120, x=470, y=330)
+
 
 def game():
-    game_widget = Window()
-    game_widget["bg"] = "green"
+    global widget
+    for w in widget.winfo_children():
+        w.destroy()
+    X = 320
+    Y = 480
 
+    back_button = ttk.Button(widget, text="Выйти из игры", command=exit_game)
+    back_button.pack(anchor='nw')
+    
     #Тасовка карт
     random.shuffle(all_cards)
     cards = deepcopy(all_cards)
@@ -153,48 +254,34 @@ def game():
     for i in range(4):
         cards.pop(0)
     
-    player_tot = total(player)
-    croupier_tot = total(croupier)
+    if len(set(player).intersection(ACES))==2:
+        player_tot = 2
+    else:
+        player_tot = total(player)
+
+    #Показываем начальные карты
+    show_card(CARD_PATH.format(player[0]), X, Y)
+    show_card(CARD_PATH.format(player[1]), X+80, Y)
+    
+    show_card(CARD_PATH.format(croupier[0]), X, Y-470)
+    show_card(CARD_PATH.format("back"), X+80, Y-470)
+
+    #Счет
+    score = ttk.Label(widget, text=f"Сумма: {player_tot}", background="green", foreground="white", font=("Arial", 14))
+    score.place(height=40, width=100, x=10, y=520)
 
     #Передаем ход игроку
-    player, player_tot, player_took = player_turn(player, cards)
-    if player_took ==-1:
-        print("Сумма: ", player_tot)
-        print("Вы проиграли!")
-        return
-    
-    #Удаляем из колоды карты, которые взял игрок
-    for _ in range(player_took):
-        cards.pop(0)
-    
+    new_card_button = ttk.Button(widget, text="Ещё!", command=lambda pl = player, cs = cards: take_card(pl, cs))
+    new_card_button.place(x=400, y=450)
+
     #Передаем ход крупье
-    croupier, croupier_tot, croupier_took = croupier_turn(croupier, cards)
-    if croupier_took == -1:
-        print("*************")
-        show_cards(player)
-        print("Сумма: ", player_tot)
-        show_cards(croupier, False)
-        print("Сумма: ", croupier_tot)
-        print("*************")
-        print("Вы выиграли")
-        return
-    for _ in range(croupier_took):
-        cards.pop(0)
-
-    print("*************")
-    show_cards(player)
-    print("Сумма: ", player_tot)
-    show_cards(croupier, False)
-    print("Сумма: ", croupier_tot)
-    print("*************")
-
-    get_winner(player_tot, croupier_tot)
-
-
+    stop_card_button = ttk.Button(widget, text="Хватит", command=lambda cr = croupier, cs = cards, pl = player: croupier_take(cr, cs, pl))
+    stop_card_button.place(x=500, y=450)
 
 
 def main():
-
+    for w in widget.winfo_children():
+        w.destroy()
     #Управление на главном окне
     frame_main = ttk.Frame(borderwidth=1, relief=SOLID)
     button_start = ttk.Button(frame_main, text="Новая игра", command = start_game, width=50)
@@ -210,10 +297,12 @@ def main():
     widget.mainloop()
     #widget.protocol("WM_DELETE__WINDOW", finish)
 
+
 if __name__ == "__main__":
     widget = Tk()
+    widget["bg"] = "green"
     widget.title("BlackJack")
     icon = PhotoImage(file=ICON_PATH)
     widget.iconphoto(False, icon)
-    widget.geometry("300x200")
+    widget.geometry("900x600+300+100")
     main()
