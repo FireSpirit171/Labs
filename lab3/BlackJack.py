@@ -4,7 +4,7 @@ import random
 from copy import deepcopy
 from PIL import Image, ImageTk
 from logic import total, show_cards, get_winner, player_turn, croupier_turn
-from config import ICON_PATH, BACK_BUTTON_PATH, STAT_PATH, CARD_PATH
+from config_path import ICON_PATH, BACK_BUTTON_PATH, STAT_PATH, CARD_PATH
 
 ACES = {"A_s", "A_h", "A_c", "A_d"}
 
@@ -91,28 +91,79 @@ def finish():
     global widget
     widget.destroy()
 
-def show_stat():    
+def get_stat():    
     #Читаем 3 строки файла и присваиваем значения в переменные
     with open(STAT_PATH, 'r') as stat_file:
         info_numbers = []
         for line in stat_file.readlines():
             info_numbers.append(line.split(": ")[1])
-    games, wons, percant = info_numbers
+    games, wons, draws, loses, percant = info_numbers
     good_open = True
 
     #Преобразование типов и печать об удачном/неудачном открытии
     try:
         games = int(games)
         wons = int(wons)
-        percant = int(percant)
+        draws = int(draws)
+        loses = int(loses)
+        percant = float(percant)
     except:
         good_open = False
 
     if good_open:
-        print("Обработано")
-        print(f"Количество игр: {games}\nПобед: {wons}\nПроцент побед: {percant}%") 
+        return games, wons, draws, loses, percant 
     else:
         print("Ошибка!")
+
+def update_stat(result):
+    games, wons, draws, loses, percent = get_stat()
+    games += 1  
+    if result == 1:
+        wons += 1
+    elif result == 0:
+        draws += 1
+    else: 
+        loses += 1
+    percent = round((wons/games)*100, 2)
+    with open (STAT_PATH, 'w') as stat_file:
+        stat_file.write(f"Games: {games}\n")
+        stat_file.write(f"Wons: {wons}\n")
+        stat_file.write(f"Draws: {draws}\n")
+        stat_file.write(f"Loses: {loses}\n")
+        stat_file.write(f"Percant: {percent}")
+
+def rewrite_stat():
+    with open (STAT_PATH, 'w') as stat_file:
+        stat_file.write("Games: 0\n")
+        stat_file.write("Wons: 0\n")
+        stat_file.write("Draws: 0\n")
+        stat_file.write("Loses: 0\n")
+        stat_file.write("Percant: 0")
+
+def show_stat():
+    global widget
+    games, wons, draws, loses, percent = get_stat()
+    
+    for w in widget.winfo_children():
+        w.destroy()
+
+    stat_frame = ttk.Frame(borderwidth=1, relief=SOLID)
+    games_label = ttk.Label(stat_frame, text=f"Количество игр: {games}", background="green", foreground="white", font=("Arial", 16))
+    wons_label = ttk.Label(stat_frame, text=f"Победы: {wons}", background="green", foreground="white", font=("Arial", 16))
+    draws_label = ttk.Label(stat_frame, text=f"Ничьи: {draws}", background="green", foreground="white", font=("Arial", 16))
+    loses_label = ttk.Label(stat_frame, text=f"Поражения: {loses}", background="green", foreground="white", font=("Arial", 16))
+    percent_label = ttk.Label(stat_frame, text=f"Процент побед: {percent}%", background="green", foreground="white", font=("Arial", 16))
+    
+    games_label.pack(fill=X, ipadx=10, ipady=10)
+    wons_label.pack(fill=X, ipadx=10, ipady=10)
+    draws_label.pack(fill=X, ipadx=10, ipady=10)
+    loses_label.pack(fill=X, ipadx=10, ipady=10)
+    percent_label.pack(fill=X, ipadx=10, ipady=10)
+
+    stat_frame.pack(expand=True)
+
+    back_button = ttk.Button(widget, text="Назад", command=exit_game)
+    back_button.pack(anchor='nw')
 
 def start_game():
     global widget
@@ -179,6 +230,7 @@ def take_card(player, cards):
     score.place(height=40, width=100, x=10, y=520)
 
     if player_tot>21:
+        update_stat(-1)
         for w in widget.winfo_children():
             if type(w)==ttk.Button:
                 w.destroy()
@@ -218,12 +270,15 @@ def croupier_take(croupie, cards, player):
 
     #После добора крупье считаем победителя
     if croupie_tot>21 or croupie_tot<player_tot:
+        update_stat(1)
         end = ttk.Label(widget, text="Вы выиграли!", background="green", foreground="white", font=("Arial", 24))
         end.place(height=90, width=240, x=350, y=250)
     elif croupie_tot==player_tot:
+        update_stat(0)
         end = ttk.Label(widget, text="Ничья!", background="green", foreground="white", font=("Arial", 24))
         end.place(height=90, width=240, x=350, y=250)
     else:
+        update_stat(-1)
         end = ttk.Label(widget, text="Вы проиграли!", background="green", foreground="white", font=("Arial", 24))
         end.place(height=90, width=240, x=350, y=250)
     
@@ -238,6 +293,10 @@ def game():
     global widget
     for w in widget.winfo_children():
         w.destroy()
+    global all_images
+    global num_cards_on_screen
+    all_images.clear()      #Очистка буфера после предыдущей игры
+    num_cards_on_screen=0   #Очистка буфера после предыдущей игры
     X = 320
     Y = 480
 
@@ -305,4 +364,5 @@ if __name__ == "__main__":
     icon = PhotoImage(file=ICON_PATH)
     widget.iconphoto(False, icon)
     widget.geometry("900x600+300+100")
+    rewrite_stat()
     main()
