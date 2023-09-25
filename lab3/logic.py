@@ -81,10 +81,24 @@ for m in [hearts, diamonds, spades, clubs]:
 
 #Подсчет суммы карт
 def total(person):
-    tot = 0
+    total_value = 0
+    ace_count = 0
+
     for card in person:
-        tot += info[card]
-    return tot
+        if card[0] in ['K', 'Q', 'J']:
+            total_value += info[card]
+        elif card[0] == 'A':
+            ace_count += 1
+            total_value += info[card]
+        else:
+            total_value += info[card]
+
+    # Обработка того, что Ace может считаться за 1, если сумма больше 21
+    while ace_count > 0 and total_value > 21:
+        total_value -= 10
+        ace_count -= 1
+
+    return total_value
 
 #Покаазть карты
 def show_cards(person, is_player=True):
