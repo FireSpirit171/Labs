@@ -185,14 +185,12 @@ def croupier_turn(croupie, cards):
   
     return croupie, croupie_tot, num
 
-
-
-def main():
+def init_game():
     #Тасовка карт
     random.shuffle(all_cards)
     cards = deepcopy(all_cards)
 
-    #Раздаем начальные карты
+    # Раздаем начальные карты
     player = [cards[0], cards[1]]
     croupier = [cards[2], cards[3]]
     for i in range(4):
@@ -200,6 +198,11 @@ def main():
     
     player_tot = total(player)
     croupier_tot = total(croupier)
+    
+    return player, croupier, cards, player_tot, croupier_tot
+
+def main():
+    player, croupier, cards, player_tot, croupier_tot = init_game()
 
     #Передаем ход игроку
     player, player_tot, player_took = player_turn(player, cards)
