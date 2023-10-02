@@ -3,10 +3,9 @@ from tkinter import ttk
 import random
 from copy import deepcopy
 from PIL import Image, ImageTk
-from logic import total, show_cards, get_winner, player_turn, croupier_turn
+from logic import total
 from config_path import ICON_PATH, STAT_PATH, CARD_PATH, CROUPIER_PATH, RULE
 
-ACES = {"A_s", "A_h", "A_c", "A_d"}
 
 #/////////////////////////////ВЗЯТО ИЗ LOGIC.PY//////////////////////////
 hearts = {
@@ -220,30 +219,13 @@ def show_card(path, X, Y = 480):
     #widget.update()
     #widget.update_idletasks()
 
-def sum_player(player):
-    player_tot = total(player)
-    correct = 0
-    if player_tot>21:
-        counter = 0
-        for card in player:
-            if card in ACES:
-                counter+=1
-        correct = 10*counter 
-    return player_tot - correct
-
 def take_card(player, cards):
     global widget
     player.append(cards[0])
 
-    counter = 0
-    for card in player:
-        if card in ACES:
-            counter+=1
-    correct = 10*counter #Необходима для корректировки значения туза - 1 или 11
-
     show_card(CARD_PATH.format(cards.pop(0)), 240+len(player)*80)
 
-    player_tot = total(player) - correct
+    player_tot = total(player)
     score = ttk.Label(widget, text=f"Сумма: {player_tot}", background="green", foreground="white", font=("Arial", 14))
     score.place(height=40, width=100, x=10, y=520)
 
@@ -255,7 +237,7 @@ def take_card(player, cards):
         end = ttk.Label(widget, text="Вы проиграли!", background="green", foreground="white", font=("Arial", 24))
         end.place(height=90, width=240, x=350, y=250)
         menu_button = ttk.Button(text="Меню", command=main)
-        new_game_button = ttk.Button(text="Новая игра", command=game)
+        new_game_button = ttk.Button(text="Новая игра", command=start_game)
         
         menu_button.place(height=50, width=120, x=340, y=330)
         new_game_button.place(height=50, width=120, x=470, y=330)
@@ -263,28 +245,17 @@ def take_card(player, cards):
 def croupier_take(croupie, cards, player):
     global widget
     show_card(CARD_PATH.format(croupie[1]), 400, 150)
-    player_tot = sum_player(player)
+    player_tot = total(player)
     for w in widget.winfo_children():
         if type(w)==ttk.Button:
             w.destroy()
 
-    if len(set(croupie).intersection(ACES))==2:
-        croupie_tot = 2
-    else:
-        croupie_tot = total(croupie)
-    correct = 0
+    croupie_tot = total(croupie)
 
     while croupie_tot<17:
         croupie.append(cards[0])
         show_card(CARD_PATH.format(cards.pop(0)), 240+len(croupie)*80, 150)
         croupie_tot = total(croupie)
-        if croupie_tot>21:
-            counter = 0
-            for card in croupie:
-                if card in ACES:
-                    counter+=1
-            correct = 10*counter
-        croupie_tot = total(croupie) - correct
 
     #После добора крупье считаем победителя
     if croupie_tot>21 or croupie_tot<player_tot:
@@ -302,15 +273,12 @@ def croupier_take(croupie, cards, player):
     
     #Кнопки возврата в меню или начала новой игры
     menu_button = ttk.Button(text="Меню", command=main)
-    new_game_button = ttk.Button(text="Новая игра", command=game)
+    new_game_button = ttk.Button(text="Новая игра", command=start_game)
     menu_button.place(height=50, width=120, x=340, y=330)
     new_game_button.place(height=50, width=120, x=470, y=330)
 
 
 def game():
-    global widget
-    for w in widget.winfo_children():
-        w.destroy()
     
     global all_images
     global num_cards_on_screen
@@ -341,10 +309,7 @@ def game():
     for i in range(4):
         cards.pop(0)
     
-    if len(set(player).intersection(ACES))==2:
-        player_tot = 2
-    else:
-        player_tot = total(player)
+    player_tot = total(player)
 
     #Показываем начальные карты
     show_card(CARD_PATH.format(player[0]), X, Y)
