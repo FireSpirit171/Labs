@@ -4,6 +4,7 @@ import random
 from copy import deepcopy
 from PIL import Image, ImageTk
 from logic import total
+from read import read_singletone
 from config_path import ICON_PATH, STAT_PATH, CARD_PATH, CROUPIER_PATH, RULE
 
 
@@ -107,47 +108,6 @@ def rules():
     back_button = ttk.Button(widget, text="Назад", command=exit_game)
     back_button.place(x=0, y=0)
 
-def get_stat():    
-    #Читаем 3 строки файла и присваиваем значения в переменные
-    with open(STAT_PATH, 'r') as stat_file:
-        info_numbers = []
-        for line in stat_file.readlines():
-            info_numbers.append(line.split(": ")[1])
-    games, wons, draws, loses, percant = info_numbers
-    good_open = True
-
-    #Преобразование типов и печать об удачном/неудачном открытии
-    try:
-        games = int(games)
-        wons = int(wons)
-        draws = int(draws)
-        loses = int(loses)
-        percant = float(percant)
-    except:
-        good_open = False
-
-    if good_open:
-        return games, wons, draws, loses, percant 
-    else:
-        print("Ошибка!")
-
-def update_stat(result):
-    games, wons, draws, loses, percent = get_stat()
-    games += 1  
-    if result == 1:
-        wons += 1
-    elif result == 0:
-        draws += 1
-    else: 
-        loses += 1
-    percent = round((wons/games)*100, 2)
-    with open (STAT_PATH, 'w') as stat_file:
-        stat_file.write(f"Games: {games}\n")
-        stat_file.write(f"Wons: {wons}\n")
-        stat_file.write(f"Draws: {draws}\n")
-        stat_file.write(f"Loses: {loses}\n")
-        stat_file.write(f"Percant: {percent}")
-
 def rewrite_stat():
     with open (STAT_PATH, 'w') as stat_file:
         stat_file.write("Games: 0\n")
@@ -156,9 +116,10 @@ def rewrite_stat():
         stat_file.write("Loses: 0\n")
         stat_file.write("Percant: 0")
 
+        
 def show_stat():
-    global widget
-    games, wons, draws, loses, percent = get_stat()
+    global widget, stat_file
+    games, wons, draws, loses, percent = stat_file.read_file()
     
     for w in widget.winfo_children():
         w.destroy()
@@ -220,7 +181,7 @@ def show_card(path, X, Y = 480):
     #widget.update_idletasks()
 
 def take_card(player, cards):
-    global widget
+    global widget, stat_file
     player.append(cards[0])
 
     show_card(CARD_PATH.format(cards.pop(0)), 240+len(player)*80)
@@ -230,7 +191,7 @@ def take_card(player, cards):
     score.place(height=40, width=100, x=10, y=520)
 
     if player_tot>21:
-        update_stat(-1)
+        stat_file.update_stat(-1)
         for w in widget.winfo_children():
             if type(w)==ttk.Button:
                 w.destroy()
@@ -243,7 +204,7 @@ def take_card(player, cards):
         new_game_button.place(height=50, width=120, x=470, y=330)
 
 def croupier_take(croupie, cards, player):
-    global widget
+    global widget, stat_file
     show_card(CARD_PATH.format(croupie[1]), 400, 150)
     player_tot = total(player)
     for w in widget.winfo_children():
@@ -259,15 +220,15 @@ def croupier_take(croupie, cards, player):
 
     #После добора крупье считаем победителя
     if croupie_tot>21 or croupie_tot<player_tot:
-        update_stat(1)
+        stat_file.update_stat(1)
         end = ttk.Label(widget, text="Вы выиграли!", background="green", foreground="white", font=("Arial", 24))
         end.place(height=90, width=240, x=350, y=250)
     elif croupie_tot==player_tot:
-        update_stat(0)
+        stat_file.update_stat(0)
         end = ttk.Label(widget, text="Ничья!", background="green", foreground="white", font=("Arial", 24))
         end.place(height=90, width=240, x=350, y=250)
     else:
-        update_stat(-1)
+        stat_file.update_stat(-1)
         end = ttk.Label(widget, text="Вы проиграли!", background="green", foreground="white", font=("Arial", 24))
         end.place(height=90, width=240, x=350, y=250)
     
@@ -360,4 +321,5 @@ if __name__ == "__main__":
     widget.iconphoto(False, icon)
     widget.geometry("900x600+300+100")
     rewrite_stat()
+    stat_file = read_singletone(STAT_PATH) #Переменная для работы со статистикой
     main()
