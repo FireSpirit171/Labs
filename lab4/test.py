@@ -2,6 +2,7 @@ import unittest
 from field import field
 from gen_random import gen_random
 
+
 class TestFieldFucnction(unittest.TestCase):
     def test_1(self):
         goods = [
