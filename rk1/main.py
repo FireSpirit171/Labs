@@ -176,8 +176,10 @@ def main():
         res_11_det.setdefault(man_name, []).append(det)
         res_11_sal[man_name] = man_salary
     
-    for name, dets in res_11_det.items():
-        print((name, res_11_sal[name], dets))
+    [print (name, res_11_sal[name], dets) 
+     for name, dets in res_11_det.items() 
+     if str(name).endswith('ов')]
+
     
 
     print('Задание Д2')
@@ -199,6 +201,6 @@ def main():
 
     print('Задание Д3')
 
-    
+
 if __name__ == "__main__":
     main()
