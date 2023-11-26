@@ -13,3 +13,5 @@
 
 *config.py
 **/__pycache__
+*.mod
+*.vscode
