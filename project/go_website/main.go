@@ -1,19 +1,24 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
-type Person struct {
-	name    string
-	surname string
-	age     int
+func home_page(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello website")
+}
+
+func autor_page(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "The autor of this website")
+}
+
+func handleRequest() {
+	http.HandleFunc("/", home_page)
+	http.HandleFunc("/autor/", autor_page)
+	http.ListenAndServe(":8000", nil)
 }
 
 func main() {
-	emp1 := Person{"Bob", "Neverback", 25}
-	fmt.Println("1)", emp1.info())
-}
-
-func (emp *Person) info() string {
-	var info string = emp.name + " " + emp.surname + " " + fmt.Sprint(emp.age)
-	return info
+	handleRequest()
 }
