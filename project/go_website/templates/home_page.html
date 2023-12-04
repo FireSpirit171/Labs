@@ -25,21 +25,23 @@
 
         .movies {
             display: flex;
-            justify-content: space-around;
             flex-wrap: wrap;
+            justify-content: space-around;
             padding: 20px;
+            gap: 20px;
         }
 
         .movie {
             text-align: center;
-            width: 200px;
+            width: calc(25% - 40px); /* 4 элемента в ряд, вычтем отступы */
             margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Добавим небольшую тень */
         }
 
         .movie img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
+            width: 100%;
+            border-radius: 5px 5px 0 0; /* Округлим верхние углы изображения */
         }
 
         footer {
@@ -53,37 +55,21 @@
 
 <body>
     <header>
-        <h1>Обоzреватель - Обзоры фильмов</h1>
+        <h1>Обзоры фильмов</h1>
     </header>
 
     <div class="movies">
-        <div class="movie">
-            <img src="link_to_movie_poster1.jpg" alt="Название фильма 1">
-            <h3>Название фильма 1</h3>
-            <p><a href="#">Обзор</a></p>
-        </div>
-
-        <div class="movie">
-            <img src="link_to_movie_poster2.jpg" alt="Название фильма 2">
-            <h3>Название фильма 2</h3>
-            <p><a href="#">Обзор</a></p>
-        </div>
-
-        <div class="movie">
-            <img src="link_to_movie_poster3.jpg" alt="Название фильма 3">
-            <h3>Название фильма 3</h3>
-            <p><a href="#">Обзор</a></p>
-        </div>
-
-        <div class="movie">
-            <img src="link_to_movie_poster4.jpg" alt="Название фильма 4">
-            <h3>Название фильма 4</h3>
-            <p><a href="#">Обзор</a></p>
-        </div>
+        {{range $index, $film := .}}
+            <div class="movie">
+                <img src="{{.Photo}}" alt="{{.Name}}">
+                <h3>{{.Name}}</h3>
+                <p><a href="#">Обзор</a></p>
+            </div>
+        {{end}}
     </div>
 
     <footer>
-        <p>&copy; 2023 Обоzреватель - Обзоры фильмов</p>
+        <p>&copy; 2023 Обзоры фильмов</p>
     </footer>
 </body>
 
