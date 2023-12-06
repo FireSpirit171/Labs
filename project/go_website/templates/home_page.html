@@ -1,61 +1,18 @@
+{{ define "home_page"}}
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <title>Обоzреватель - Обзоры фильмов</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px 0;
-            text-align: center;
-        }
-
-        h1 {
-            margin: 0;
-        }
-
-        .movies {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        .movie {
-            text-align: center;
-            width: calc(25% - 40px); /* 4 элемента в ряд, вычтем отступы */
-            margin-bottom: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Добавим небольшую тень */
-        }
-
-        .movie img {
-            width: 100%;
-            border-radius: 5px 5px 0 0; /* Округлим верхние углы изображения */
-        }
-
-        footer {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-        }
-    </style>
+    <link rel="stylesheet" href="static/style.css">
 </head>
 
 <body>
     <header>
         <h1>Обзоры фильмов</h1>
+        <a href="/new_review/">Добавить обзор</a>
     </header>
 
     <div class="movies">
@@ -71,6 +28,8 @@
     <footer>
         <p>&copy; 2023 Обзоры фильмов</p>
     </footer>
-</body>
-
+    </body>
+    
 </html>
+
+{{ end }}
