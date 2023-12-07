@@ -14,7 +14,7 @@
     </header>
     <main>
         <h1>Новый обзор</h1>
-        <form action="/save_new_review" method="post">
+        <form action="/save_new_review/" method="post", enctype="multipart/form-data">
             <label for="filmName">Название фильма:</label><br>
             <input type="text" id="filmName" name="filmName" required><br><br>
 
@@ -22,7 +22,7 @@
             <textarea id="plot" name="plot" rows="4" cols="50" required></textarea><br><br>
 
             <label for="posterLink">Ссылка на постер фильма:</label><br>
-            <input type="text" id="posterLink" name="posterLink" required><br><br>
+            <input type="file" id="posterLink" name="posterLink" required><br><br>
 
             <input type="submit" value="Добавить обзор">
         </form>
