@@ -3,7 +3,7 @@ from create_object import manufacturers, details, manufacturer_details
 from tabulate import tabulate
 from operator import itemgetter
 
-def task1():
+def task1(one_to_many):
     # Выводим производителей, их зарплаты и их детали если
     # фамилия сторудника заканчивается на ов
     res_11_det = {}
@@ -16,18 +16,15 @@ def task1():
         res_11_det.setdefault(man_name, []).append(det)
         res_11_sal[man_name] = man_salary
     
-    data = [] #Для красивого вывода
+    data = []
     for name, dets in res_11_det.items():
         if str(name).endswith('ов'):
             data.append([name, res_11_sal[name], dets])
 
-    table = tabulate(data, headers=["Производитель", "Зарплата", "Детали"], tablefmt="pretty")
-    print(table)
+    return data
 
 
-
-
-def task2():
+def task2(manufacturers, one_to_many):
     # Отсортируем по убыванию стоимость детали у одного производителя
     # то есть делим зарплату на количество деталей сотрудника 
     res_12_uns = []
@@ -41,12 +38,8 @@ def task2():
     #Сортировка по цене за деталь
     return res_12_uns
 
-
-
-
-def task3():
-    # Для создания робота-пылесоса нужно сделать эти детали.
-    robot_vacuum = [
+# Для создания робота-пылесоса нужно сделать эти детали.
+robot_vacuum = [
         'Мотор',
         'Датчик',
         'Кнопка',
@@ -58,20 +51,16 @@ def task3():
         'Панель',
         'Фильтр',
     ]
-    # Определим производителей, которые нам нужны
-    # для сборки робота-пылесоса
+    # Опреде
 
+def task3(robot_vacuum, many_to_many, manufacturers, one_to_many):
     d_emps = {}
     for d in robot_vacuum:
         for detail, name in many_to_many:
             if d == detail:
-                # Список сотрудников, которые могут произвести эту деталь
                 d_emps.setdefault(d, set()).add(name)
 
-    # Воспользуемся результатом задания 2 и 
-    # определим рабочих, которых нужно использовать
-    # для сборки роботы-пылесоса за наименшую цену
-    cheap_mans = sorted(task2(), key=itemgetter(1))
+    cheap_mans = sorted(task2(manufacturers, one_to_many), key=itemgetter(1))
     res_13 = {}
     sum_prod = []
     for dtl, mans in d_emps.items():
@@ -81,15 +70,14 @@ def task3():
                 sum_prod.append(float(cheap_man[1]))
                 break  
     
-    data = [] #Для красиового вывода
+    data = []
     i = 0 
     for dtl, man in res_13.items():
         data.append([dtl, man, sum_prod[i]])
         i += 1
 
-    table = tabulate(data, headers=["Деталь", "Производитель", "Стоимость"], tablefmt="pretty")
-    print(table)
-    print(f"Затраты на производство робота-пылесоса: {sum(sum_prod)}")
+    total_cost = sum(sum_prod)
+    return data, total_cost
 
 
 
@@ -97,15 +85,19 @@ def task3():
 def main():
     """Основная функция"""
     print('Задание Д1')
-    task1()
-
-    print('\nЗадание Д2')
-    res_12 = sorted(task2(), key=itemgetter(1), reverse=True)
-    table = tabulate(res_12, headers=["Производитель", "Стоимость одной детали"], tablefmt="pretty")
+    table = table = tabulate(task1(one_to_many), headers=["Производитель", "Зарплата", "Детали"], tablefmt="pretty")
     print(table)
 
+    print('\nЗадание Д2')
+    res_12 = sorted(task2(manufacturers, one_to_many), key=itemgetter(1), reverse=True)
+    table2 = tabulate(res_12, headers=["Производитель", "Стоимость одной детали"], tablefmt="pretty")
+    print(table2)
+
     print('\nЗадание Д3')
-    task3()
+    data3, total = task3(robot_vacuum, many_to_many, manufacturers, one_to_many)
+    table3 = tabulate(data3, headers=["Деталь", "Производитель", "Стоимость"], tablefmt="pretty")
+    print(table3)
+    print(f"Затраты на производство робота пылесоса: {total}")
 
     a = input()
 
