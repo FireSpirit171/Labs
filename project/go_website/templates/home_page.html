@@ -18,13 +18,14 @@
     <div class="movies">
         {{range $index, $film := .}}
             <div class="movie">
-                <img src="{{.Photo}}" alt="{{.Name}}">
+                <a href="/review/{{.Id}}">
+                    <img src="{{.Photo}}" alt="{{.Name}}">
+                </a>
                 <h3>{{.Name}}</h3>
-                <p><a href="#">Обзор</a></p>
             </div>
         {{end}}
     </div>
-
+  
     <footer>
         <p>&copy; 2023 Обзоры фильмов</p>
     </footer>
