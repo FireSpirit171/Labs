@@ -33,10 +33,29 @@ h1 {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Добавим небольшую тень */
 }
 
+.movie h3 {
+    font-size: 1.2em; /* Увеличим размер шрифта для названий */
+    margin-top: 0; /* Уберем верхний отступ */
+    text-decoration: none; /* Убираем стандартное оформление ссылки */
+    display: block; /* Делаем названия блочными элементами */
+    padding: 10px; /* Добавим отступ вокруг текста */
+    background-color: lightgrey; /* Установим цвет фона */
+    border-radius: 5px; /* Закруглим углы */
+    cursor: default; /* Отключим курсор для текста */
+}
+
 .movie img {
     width: 100%;
-    border-radius: 5px 5px 0 0; /* Округлим верхние углы изображения */
+    height: 90%; /* Задай высоту изображений, чтобы они были одного размера */
+    object-fit: cover; /* Обрежь изображения до заданных размеров */
+    border-radius: 5px 5px 0 0; /* Округлим углы изображения */
 }
+
+
+.movie a:hover {
+    opacity: 0.7; /* При наведении на ссылку уменьшим немного прозрачность */
+}
+
 
 footer {
     background-color: #333;
@@ -103,4 +122,38 @@ header a {
 
 header a:hover {
     background-color: #555;
+}
+
+.film-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.film-details {
+    flex: 1;
+    padding-right: 20px;
+    max-width: 70%;
+    text-align: justify; /* Выравниваем текст по ширине */
+}
+
+.film-details h1 {
+    font-size: 36px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    text-align: center; /* Центрируем название */
+}
+
+.film-details p {
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+.film-poster {
+    max-width: 30%; /* Сокращаем постер до 30% */
+}
+
+.film-poster img {
+    max-width: 100%;
+    height: auto;
 }
